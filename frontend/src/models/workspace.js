@@ -278,6 +278,19 @@ const Workspace = {
     const data = await response.json();
     return { response, data };
   },
+  uploadLinksBulk: async function (slug, links) {
+    const response = await fetch(
+      `${API_BASE}/workspace/${slug}/upload-links-bulk`,
+      {
+        method: "POST",
+        body: JSON.stringify({ links }),
+        headers: baseHeaders(),
+      }
+    );
+
+    const data = await response.json();
+    return { response, data };
+  },
 
   getSuggestedMessages: async function (slug) {
     return await fetch(`${API_BASE}/workspace/${slug}/suggested-messages`, {

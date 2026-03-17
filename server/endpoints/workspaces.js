@@ -203,6 +203,65 @@ function workspaceEndpoints(app) {
   );
 
   app.post(
+    "/workspace/:slug/upload-links-bulk",
+    [validatedRequest, flexUserRoleValid([ROLES.admin, ROLES.manager])],
+    async (request, response) => {
+      try {
+        const Collector = new CollectorApi();
+        const { links = [] } = reqBody(request);
+        const processingOnline = await Collector.online();
+
+        if (!processingOnline) {
+          response
+            .status(500)
+            .json({
+              success: false,
+              error: `Document processing API is not online. Links will not be processed.`,
+            })
+            .end();
+          return;
+        }
+
+        if (!Array.isArray(links) || links.length === 0) {
+          response
+            .status(400)
+            .json({ success: false, error: "No valid links provided." })
+            .end();
+          return;
+        }
+
+        const results = { successful: 0, failed: 0, errors: [] };
+        for (const link of links) {
+          const trimmedLink = link.trim();
+          if (!trimmedLink) continue;
+
+          const { success, reason } = await Collector.processLink(trimmedLink);
+          if (success) {
+            results.successful++;
+          } else {
+            results.failed++;
+            results.errors.push({ link: trimmedLink, reason });
+          }
+        }
+
+        Collector.log(
+          `Bulk link upload processed: ${results.successful} successful, ${results.failed} failed.`
+        );
+        await Telemetry.sendTelemetry("links_bulk_uploaded");
+        await EventLogs.logEvent(
+          "links_bulk_uploaded",
+          { count: links.length, successful: results.successful, failed: results.failed },
+          response.locals?.user?.id
+        );
+        response.status(200).json({ success: true, results, error: null });
+      } catch (e) {
+        console.error(e.message, e);
+        response.sendStatus(500).end();
+      }
+    }
+  );
+
+  app.post(
     "/workspace/:slug/update-embeddings",
     [validatedRequest, flexUserRoleValid([ROLES.admin, ROLES.manager])],
     async (request, response) => {

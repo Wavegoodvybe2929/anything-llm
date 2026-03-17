@@ -753,6 +753,13 @@ const TRANSLATIONS = {
       "placeholder-link": "https://example.com",
       fetching: "Fetching...",
       "fetch-website": "Fetch website",
+      "import-links": "Import links from file",
+      "import-links-tooltip":
+        "Upload a .txt file containing URLs (one per line) to import multiple links at once",
+      "importing-links": "Importing...",
+      "import-success":
+        "Successfully imported {{successful}} links. {{failed}} failed.",
+      "import-error": "Error importing links: {{error}}",
       "privacy-notice":
         "These files will be uploaded to the document processor running on this AnythingLLM instance. These files are not sent or shared with a third party.",
     },
